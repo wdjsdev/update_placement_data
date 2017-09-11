@@ -7,63 +7,6 @@ function updatePlacementData(task)
 	var btPath = "/Volumes/Customization/Library/Scripts/Script Resources/Data/build_template_library.js";
 	var aaPath = "/Volumes/Customization/Library/Scripts/Script Resources/Data/central_library.js";
 
-	function sendErrors(errorList)
-	{
-		alert(errorList.join("\n"));
-	}
-
-
-	function coord()
-	{
-		var result = true;
-		var coords = {};
-		var layer;
-
-		try
-		{
-			layer = layers[0].layers["Prepress"];
-		}
-		catch(e)
-		{
-			errorList.push("Sorry. Looks like the prepress layer is missing. Please make sure the layer structure is correct.");
-			result = false;
-		}
-
-		if(result)
-		{
-			for(var a=0;a<layer.layers.length;a++)
-			{
-				var curSize = layer.layers[a].name;
-				coords[curSize] = {};
-				for(var b=0;b<layer.layers[a].groupItems.length;b++)
-				{
-					var thisPiece = layer.layers[a].groupItems[b];
-					var pieceName = thisPiece.name;
-					coords[curSize][pieceName] = [];
-					coords[curSize][pieceName][0] = (Math.floor(thisPiece.left *1000)/1000);
-					coords[curSize][pieceName][1] = (Math.floor(thisPiece.top *1000)/1000);
-				} 	
-			}
-		}
-
-		if(result)
-		{
-			return coords;
-		}
-		else
-		{
-			return result;
-		}
-	}
-
-	function getCode()
-	{
-		var layName = layers[0].name;
-		var pat = /(.*)([-_][\d]{3,}([-_][a-z])?)/i;
-
-		return layName.match(pat)[1];
-	}
-
 	function writeDatabaseFile(str,db)
 	{
 		var parenPat = /[\(\)]/g;
@@ -75,9 +18,8 @@ function updatePlacementData(task)
 
 	var docRef = app.activeDocument;
 	var layers = docRef.layers;
-	var errorList = [];
 
-	var code = getCode();
+	var code = getCode(layers[0].name);
 	var database, data, str, coords;
 
 	if(task == "aa")
@@ -127,7 +69,21 @@ function updatePlacementData(task)
 
 	if(valid)
 	{
-		coords = coord();
+		var ppLay = getPPLay(layers);
+		if(!ppLay)
+		{
+			errorList.push("Failed to find the prepress layer. Check your layer structure and try again.")
+			valid = false;
+		}
+	}
+
+	if(valid)
+	{
+		coords = coord(ppLay);
+		if(!coords)
+		{
+			errorList.push("Failed to get the coordinates. ")
+		}
 	}
 
 	if(valid && coords)
