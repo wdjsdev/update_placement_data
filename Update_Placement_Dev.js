@@ -1,6 +1,7 @@
 function updatePlacementData(task)
 {
 	var valid = true;
+	var scriptName = "update_placement";
 	// //Production Utilities
 	eval("#include \"/Volumes/Customization/Library/Scripts/Script Resources/Data/Utilities_Container.jsxbin\"");
 	eval("#include \"/Volumes/Customization/Library/Scripts/Script Resources/Data/Batch_Framework.jsxbin\"");
@@ -9,17 +10,9 @@ function updatePlacementData(task)
 	// eval("#include \"/Volumes/Macintosh HD/Users/will.dowling/Desktop/automation/utilities/Utilities_Container.js\"");
 	// eval("#include \"/Volumes/Macintosh HD/Users/will.dowling/Desktop/automation/utilities/Batch_Framework.js\"");
 	
-	//production paths
-	var btPath = "/Volumes/Customization/Library/Scripts/Script Resources/Data/build_template_library.js";
-	var aaPath = "/Volumes/Customization/Library/Scripts/Script Resources/Data/central_library.js";
-
-	function writeDatabaseFile(str,db)
+	if(!valid)
 	{
-		var parenPat = /[\(\)]/g;
-		var newContents = str + JSON.stringify(db).replace(parenPat,"");
-		dbFile.open("w");
-		dbFile.write(newContents);
-		dbFile.close();
+		return;
 	}
 
 	var docRef = app.activeDocument;
@@ -39,15 +32,15 @@ function updatePlacementData(task)
 
 		if(task == "aa")
 		{
-			eval("#include \"" + aaPath + "\"");
-			dbFile = File(aaPath);
+			dbPath = centralLibraryPath;
+			eval("#include \"" + dbPath + "\"");
 			database = prepressInfo;
 			str = "var prepressInfo = ";
 		}
 		else if(task == "bt")
 		{
-			eval("#include \"" + btPath + "\"");
-			dbFile = File(btPath);
+			dbPath = btLibraryPath;
+			eval("#include \"" + dbPath + "\"");
 			database = templateInfo;
 			str = "var templateInfo = ";
 		}
@@ -104,7 +97,8 @@ function updatePlacementData(task)
 
 		database[code] = data;
 		//write database file
-		writeDatabaseFile(str,database);
+		str += JSON.stringify(database);
+		writeDatabase(dbPath,str);
 	}
 
 	if(valid)
