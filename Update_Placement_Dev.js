@@ -1,4 +1,4 @@
-function updatePlacementData(task)
+function updatePlacementData()
 {
 	var valid = true;
 	var scriptName = "update_placement";
@@ -15,14 +15,55 @@ function updatePlacementData(task)
 		return;
 	}
 
+	logDest.push(getLogDest());
+
+
+	function getTask()
+	{
+		log.h("Beginning execution of getTask()");
+		var w = new Window("dialog");
+			var topTxt = w.add("statictext", undefined, "Which database do you want to update?");
+			var btnGroup = w.add("group");
+				var aa = UI.iconButton(btnGroup,imagesPath + "add_artwork_placement.jpg",function()
+				{
+					log.l("User selected \"Add Artwork\".");
+					task = "aa";
+					w.close();
+				});
+				var bt = UI.iconButton(btnGroup,imagesPath + "template_placement.jpg",function()
+				{
+					log.l("User selected \"Template\".");
+					task = "bt";
+					w.close();
+				})
+				var cancel = UI.button(btnGroup,"Cancel",function()
+				{
+					task = undefined;
+					valid = false;
+					w.close();
+				});
+		w.show();
+
+	}
+
+
+
+
 	var docRef = app.activeDocument;
 	var layers = docRef.layers;
+	var task;
 
 	var code = getCode(layers[0].name);
 	if(!code)
 	{
 		valid = false;
 		errorList.push("Failed to determine the garment code.");
+	}
+
+	if(valid)
+	{
+
+		getTask();
 	}
 
 	if(valid)
@@ -58,6 +99,7 @@ function updatePlacementData(task)
 		{
 			valid = false;
 			errorList.push("The garment code: " + code + " was not found in the database.");
+			log.e("The garment code: " + code + " was not found in the database.");
 		}
 	}
 
@@ -83,7 +125,9 @@ function updatePlacementData(task)
 	if(valid && coords)
 	{
 		//update the placement data
+		log.l("current database coords: ::" + JSON.stringify(data.placement));
 		data.placement = coords;
+		log.l("updated database coords: ::" + JSON.stringify(data.placement));
 		data.updatedBy = user;
 		data.updatedOn = logTime();
 		if(task === "bt")
@@ -111,39 +155,8 @@ function updatePlacementData(task)
 		sendErrors(errorList);
 	}
 
+	printLog();
 	return valid;
 	
 }
-
-function getTask()
-{
-	var w = new Window("dialog");
-		var topTxt = w.add("statictext", undefined, "Which database do you want to update?");
-		var btnGroup = w.add("group");
-			var aa = btnGroup.add("button", undefined, "Add Artwork Placement");
-				aa.onClick = function()
-				{
-					result = "aa";
-					w.close();
-				}
-			var bt = btnGroup.add("button", undefined, "Template Placement");
-				bt.onClick = function()
-				{
-					result = "bt";
-					w.close();
-				}
-			var cancel = btnGroup.add("button", undefined, "Cancel");
-				cancel.onClick = function()
-				{
-					result = undefined;
-					w.close();
-				}
-	w.show();
-
-	if(result)
-	{
-		updatePlacementData(result);
-	}
-
-}
-getTask();
+updatePlacementData();
