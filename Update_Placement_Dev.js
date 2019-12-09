@@ -36,7 +36,8 @@ function updatePlacementData()
 					task = "bt";
 					w.close();
 				})
-				var cancel = UI.button(btnGroup,"Cancel",function()
+			var cancelGroup = UI.group(w);
+				var cancel = UI.button(cancelGroup,"Cancel",function()
 				{
 					task = undefined;
 					valid = false;
