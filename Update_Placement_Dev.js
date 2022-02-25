@@ -1,3 +1,4 @@
+#target Illustrator
 function updatePlacementData()
 {
 	var valid = true;
@@ -19,7 +20,7 @@ function updatePlacementData()
 			devUtilitiesPreferenceFile.open("r");
 			var prefContents = devUtilitiesPreferenceFile.read();
 			devUtilitiesPreferenceFile.close();
-			if(prefContents === "true")
+			if(prefContents.match(/true/i))
 			{
 				utilPath = "~/Desktop/automation/utilities/";
 				ext = ".js";
@@ -92,6 +93,9 @@ function updatePlacementData()
 	var docRef = app.activeDocument;
 	var layers = docRef.layers;
 	var task;
+
+
+	app.coordinateSystem = CoordinateSystem.ARTBOARDCOORDINATESYSTEM;
 
 	var code = getCode(layers[0].name);
 	if(!code)
